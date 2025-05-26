@@ -25,3 +25,12 @@ class SnowflakeClient:
     def close(self):
         """Close the connection."""
         self.connection.close()
+
+    def execute_many(self, query, values):
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.executemany(query, values)
+                self.connection.commit()
+        except Exception as e:
+            print(f"Error executing query: {e}")
+            return None

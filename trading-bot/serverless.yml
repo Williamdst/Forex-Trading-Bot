@@ -8,13 +8,24 @@ provider:
   name: aws
   runtime: python3.9
 
+  environment:
+    SNOWFLAKE_USERNAME: $env:SNOWFLAKE_USERNAME
+    SNOWFLAKE_PASSWORD: $env:SNOWFLAKE_PASSWORD
+    SNOWFLAKE_ACCOUNT: $env:SNOWFLAKE_ACCOUNT
+    SNOWFLAKE_DATABASE: $env:SNOWFLAKE_DATABASE
+    SNOWFLAKE_SCHEMA: $env:SNOWFLAKE_SCHEMA
+    OANDA_API_KEY: $env:OANDA_API_KEY
+
+
 plugins:
   - serverless-python-requirements
   - serverless-prune-plugin
+  - serverless-dotenv-plugin
 
 custom:
   pythonRequirements:
     slim: true
+    dockerizePip: true
   prune:
     automatic: true
     number: 3  # Keep only the 3 most recent versions
