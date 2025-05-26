@@ -1,0 +1,39 @@
+org: williamdst
+app: trading-bot
+service: trading-bot
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+
+plugins:
+  - serverless-python-requirements
+  - serverless-prune-plugin
+
+custom:
+  pythonRequirements:
+    slim: true
+  prune:
+    automatic: true
+    number: 3  # Keep only the 3 most recent versions
+
+package:
+  individually: true
+  patterns:
+    - '!**/*'  # Exclude everything by default
+    - 'integrations/**'  # Include the integrations folder for all functions
+    - 'requirements.txt'
+    - '!__pycache__/**'
+    - '!*.pyc'
+
+functions:
+  Oanda-Candle-Extract:
+    name: Oanda-Candle-Extract
+    handler: candle_extract.lambda_handler
+    memorySize: 2048
+    package:
+      patterns:
+        - 'candle_extract.py'
+        - 'integrations/**'
