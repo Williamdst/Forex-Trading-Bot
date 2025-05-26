@@ -7,6 +7,7 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: python3.9
+  timeout: 300
 
   environment:
     SNOWFLAKE_USERNAME: $env:SNOWFLAKE_USERNAME
@@ -15,20 +16,6 @@ provider:
     SNOWFLAKE_DATABASE: $env:SNOWFLAKE_DATABASE
     SNOWFLAKE_SCHEMA: $env:SNOWFLAKE_SCHEMA
     OANDA_API_KEY: $env:OANDA_API_KEY
-
-
-plugins:
-  - serverless-python-requirements
-  - serverless-prune-plugin
-  - serverless-dotenv-plugin
-
-custom:
-  pythonRequirements:
-    slim: true
-    dockerizePip: true
-  prune:
-    automatic: true
-    number: 3  # Keep only the 3 most recent versions
 
 package:
   individually: true
@@ -43,8 +30,21 @@ functions:
   Oanda-Candle-Extract:
     name: Oanda-Candle-Extract
     handler: candle_extract.lambda_handler
-    memorySize: 2048
+    memorySize: 1024
     package:
       patterns:
         - 'candle_extract.py'
         - 'integrations/**'
+
+plugins:
+  - serverless-python-requirements
+  - serverless-prune-plugin
+  - serverless-dotenv-plugin
+
+custom:
+  pythonRequirements:
+    slim: true
+    dockerizePip: true
+  prune:
+    automatic: true
+    number: 3  # Keep only the 3 most recent versions

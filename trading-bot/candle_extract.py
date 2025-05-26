@@ -19,6 +19,10 @@ def lambda_handler(event, context):
     - dict: API response containing status code and transformed candle data
     """
     print("Received event:", event)
+    try:
+        event = event['Payload']
+    except KeyError:
+        pass
 
     SNOWFLAKE = SnowflakeClient(
         user=os.environ["SNOWFLAKE_USERNAME"],
@@ -37,7 +41,7 @@ def lambda_handler(event, context):
 
     try:
         instrument = event['instrument'].upper()
-        granularity = event['granularity'].upper()
+        granularity = event.get('granularity', 'H1').upper()
         count = event.get('count', 2)
         from_date = event.get('from_date', None)
         to_date = event.get('to_date', None)
@@ -101,16 +105,18 @@ def lambda_handler(event, context):
     """
 
     SNOWFLAKE.execute_many(insert_sql, transformed)
-    return transformed
+    return None
 
 if __name__ == "__main__":
-    test_event = {
-        'instrument': 'EUR_USD',
-        'granularity': 'H1',
-        'count': 2
-        # 'from_date': '2025-01-01T00:00:00Z',
-        # 'to_date': '2025-02-01T00:00:00Z'
-    }
-    result = lambda_handler(test_event, None)
-    print(result)
-    print(len(result))
+    for instrument in [
+        'EUR_USD', 'USD_CAD', 'GBP_USD', 'USD_CHF',
+        'AUD_USD', 'NZD_USD', 'USD_JPY'
+    ]:
+        test_event = {
+            'instrument': instrument,
+            'granularity': 'H1',
+            # 'count': 2
+            'from_date': '2025-01-01T00:00:00Z'
+        }
+        result = lambda_handler(test_event, None)
+
