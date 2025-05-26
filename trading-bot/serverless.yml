@@ -27,6 +27,15 @@ package:
     - '!*.pyc'
 
 functions:
+  Oanda-Instrument-Config:
+    name: Oanda-Instrument-Config
+    handler: instrument_config.lambda_handler
+    memorySize: 128
+    package:
+      patterns:
+        - 'instrument_config.py'
+        - 'integrations/**'
+
   Oanda-Candle-Extract:
     name: Oanda-Candle-Extract
     handler: candle_extract.lambda_handler
