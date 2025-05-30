@@ -1,8 +1,8 @@
-import snowflake.connector
+import snowflake.connector as snow
 
 class SnowflakeClient:
     def __init__(self, user, password, account, warehouse, database, schema):
-        self.connection = snowflake.connector.connect(
+        self.connection = snow.connect(
             user=user,
             password=password,
             account=account,
@@ -11,13 +11,15 @@ class SnowflakeClient:
             schema=schema
         )
 
-    def run_query(self, query):
+    def run_query(self, query, use_pandas=False):
         """Execute a SQL query and return the results as a list of tuples."""
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(query)
-                results = cursor.fetchall()
-                return results
+                if use_pandas:
+                    return cursor.fetch_pandas_all()
+                else:
+                    return cursor.fetchall()
         except Exception as e:
             print(f"Error executing query: {e}")
             return None

@@ -116,7 +116,7 @@ if __name__ == "__main__":
             'instrument': instrument,
             'granularity': 'H1',
             # 'count': 2
-            'from_date': '2025-01-01T00:00:00Z'
+            'from_date': '2025-05-01T00:00:00Z'
         }
         result = lambda_handler(test_event, None)
 
