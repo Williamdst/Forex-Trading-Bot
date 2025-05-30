@@ -1,24 +1,22 @@
 import pandas as pd
 
-def generate_renko_bricks(df, brick_size):
-    columns = ['candle_open_time', 'candle_close_time', 'open', 'close', 'brick_type', 'streak_order']
-
+def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
     # The function recreates the entire renko dataset given the OHLC candles
     renko_list = []
 
-    # Somehow in the df the artificial first candle is in there
+    brick_size = brick_config['brick_size']
     previous_candle_stats = {
-        'candle_open_time': df.iloc[0]['candle_open_time'],
+        'candle_open_time': None,
         'candle_close_time': None,
-        'open': df.iloc[0]['mid_close'],
-        'close': None,
-        'brick_type': None,
+        'open': brick_config['artificial_brick_open'],
+        'close': brick_config['artificial_brick_close'],
+        'brick_type': brick_config['brick_type'],
         'streak_order': 0
     }
 
     for index, row in df.iterrows():
         current_candle_close_time = row['candle_close_time']
-        current_close = round(row['mid_close'], 4)
+        current_close = row['mid_close']
 
         # Long Renko Candles
         # The if statement is based on what type of renko candle is the
@@ -37,12 +35,13 @@ def generate_renko_bricks(df, brick_size):
                 # created based on how many "brick sizes" were passed
                 brick_moves = int((current_close - previous_candle_stats['close']) / brick_size)
 
+                # For every candle
                 for i in range(brick_moves):
                     current_candle_stats = {
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
-                        'open': round(previous_candle_stats['close'], 4),
-                        'close': round(previous_candle_stats['close'] + brick_size, 4),
+                        'open': previous_candle_stats['close'],
+                        'close': previous_candle_stats['close'] + brick_size,
                         'brick_type': 'long',
                         'streak_order': i
                     }
@@ -67,8 +66,8 @@ def generate_renko_bricks(df, brick_size):
                     current_candle_stats = {
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
-                        'open': round(previous_candle_stats['open'], 4),
-                        'close': round(previous_candle_stats['open'] - brick_size, 4),
+                        'open': previous_candle_stats['open'],
+                        'close': previous_candle_stats['open'] - brick_size,
                         'brick_type': 'short',
                         'streak_order': i
                     }
@@ -77,8 +76,8 @@ def generate_renko_bricks(df, brick_size):
                         current_candle_stats = {
                             'candle_open_time': previous_candle_stats['candle_open_time'],
                             'candle_close_time': current_candle_close_time,
-                            'open': round(previous_candle_stats['close'], 4),
-                            'close': round(previous_candle_stats['close'] - brick_size, 4),
+                            'open': previous_candle_stats['close'],
+                            'close': previous_candle_stats['close'] - brick_size,
                             'brick_type': 'short',
                             'streak_order': i
                         }
@@ -98,8 +97,8 @@ def generate_renko_bricks(df, brick_size):
                     current_candle_stats = {
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
-                        'open': round(previous_candle_stats['close'], 4),
-                        'close': round(previous_candle_stats['close'] - brick_size, 4),
+                        'open': previous_candle_stats['close'],
+                        'close': previous_candle_stats['close'] - brick_size,
                         'brick_type': 'short',
                         'streak_order': i
                     }
@@ -117,8 +116,8 @@ def generate_renko_bricks(df, brick_size):
                     current_candle_stats = {
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
-                        'open': round(previous_candle_stats['open'], 4),
-                        'close': round(previous_candle_stats['open'] + brick_size, 4),
+                        'open': previous_candle_stats['open'],
+                        'close': previous_candle_stats['open'] + brick_size,
                         'brick_type': 'long',
                         'streak_order': i
                     }
@@ -127,8 +126,8 @@ def generate_renko_bricks(df, brick_size):
                         current_candle_stats = {
                             'candle_open_time': previous_candle_stats['candle_open_time'],
                             'candle_close_time': current_candle_close_time,
-                            'open': round(previous_candle_stats['close'], 4),
-                            'close': round(previous_candle_stats['close'] + brick_size, 4),
+                            'open': previous_candle_stats['close'],
+                            'close': previous_candle_stats['close'] + brick_size,
                             'brick_type': 'long',
                             'streak_order': i
                         }
@@ -136,36 +135,8 @@ def generate_renko_bricks(df, brick_size):
                     renko_list.append(current_candle_stats)
                     previous_candle_stats = current_candle_stats
 
-        # Initial Block
-        else:
-            if current_close >= previous_candle_stats['open'] + brick_size:
-                current_candle_stats = {
-                    'candle_open_time': previous_candle_stats['candle_open_time'],
-                    'candle_close_time': current_candle_close_time,
-                    'open': round(previous_candle_stats['open'], 4),
-                    'close': round(previous_candle_stats['open'] + brick_size, 4),
-                    'brick_type': 'long',
-                    'streak_order': 0
-                }
-
-                renko_list.append(current_candle_stats)
-                previous_candle_stats = current_candle_stats
-
-            elif current_close <= previous_candle_stats['open'] - brick_size:
-                current_candle_stats = {
-                    'candle_open_time': previous_candle_stats['candle_open_time'],
-                    'candle_close_time': current_candle_close_time,
-                    'open': round(previous_candle_stats['open'], 4),
-                    'close': round(previous_candle_stats['open'] - brick_size, 4),
-                    'brick_type': 'short',
-                    'streak_order': 0
-                }
-
-                renko_list.append(current_candle_stats)
-                previous_candle_stats = current_candle_stats
-
     renko_bricks = pd.DataFrame.from_dict(renko_list)
-    renko_bricks.sort_values(['candle_open_time', 'streak_order'], ascending=[True, True], inplace=True)
+    # renko_bricks.sort_values(['candle_open_time', 'streak_order'], ascending=[True, True], inplace=True)
     renko_bricks['high'] = renko_bricks[['open', 'close']].max(axis=1)
     renko_bricks['low'] = renko_bricks[['open', 'close']].min(axis=1)
     return renko_bricks
