@@ -2,8 +2,8 @@ import pandas as pd
 
 def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
     # The function recreates the entire renko dataset given the OHLC candles
-    renko_list = []
-
+    df.columns = df.columns.str.lower()
+    brick_instrument = brick_config['instrument']
     brick_size = brick_config['brick_size']
     previous_candle_stats = {
         'candle_open_time': None,
@@ -14,6 +14,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
         'streak_order': 0
     }
 
+    renko_list = []
     for index, row in df.iterrows():
         current_candle_close_time = row['candle_close_time']
         current_close = row['mid_close']
@@ -136,7 +137,16 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
                     previous_candle_stats = current_candle_stats
 
     renko_bricks = pd.DataFrame.from_dict(renko_list)
-    # renko_bricks.sort_values(['candle_open_time', 'streak_order'], ascending=[True, True], inplace=True)
+    renko_bricks['instrument'] = brick_instrument
     renko_bricks['high'] = renko_bricks[['open', 'close']].max(axis=1)
     renko_bricks['low'] = renko_bricks[['open', 'close']].min(axis=1)
-    return renko_bricks
+
+    renko_bricks.index.name = 'brick_number'
+    renko_bricks.sort_index(inplace=True)
+    renko_bricks.reset_index(inplace=True)
+    renko_bricks.columns = renko_bricks.columns.str.upper()
+
+    return renko_bricks[[
+        'INSTRUMENT', 'BRICK_NUMBER', 'CANDLE_OPEN_TIME', 'CANDLE_CLOSE_TIME',
+        'BRICK_TYPE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'STREAK_ORDER'
+    ]]
