@@ -1,3 +1,8 @@
+try:
+  import unzip_requirements
+except ImportError:
+  pass
+
 import os
 from dotenv import load_dotenv
 
@@ -115,8 +120,8 @@ if __name__ == "__main__":
         test_event = {
             'instrument': instrument,
             'granularity': 'H1',
-            # 'count': 2
-            'from_date': '2025-05-01T00:00:00Z'
+            'count': 4
+            # 'from_date': '2025-05-01T00:00:00Z'
         }
         result = lambda_handler(test_event, None)
 
