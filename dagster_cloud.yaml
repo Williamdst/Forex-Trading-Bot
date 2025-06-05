@@ -1,0 +1,4 @@
+locations:
+- code_source:
+    module_name: dagster_project
+  location_name: dagster_project
