@@ -1,5 +1,4 @@
-from dagster import Definitions, load_assets_from_package
-
+from dagster import Definitions
 from . import assets
 
 defs = Definitions()
