@@ -1,4 +1,2 @@
-snowflake-connector-python[pandas]
-boto3
-requests
+snowflake-connector-python==3.15.0
 python-dotenv

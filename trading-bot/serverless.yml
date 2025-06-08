@@ -2,11 +2,9 @@ org: williamdst
 app: trading-bot
 service: trading-bot
 
-frameworkVersion: '3'
-
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.10
   timeout: 300
 
   environment:
@@ -20,11 +18,9 @@ provider:
 package:
   individually: true
   patterns:
-    - '!**/*'  # Exclude everything by default
+    - '!**'  # Exclude everything by default
     - 'integrations/**'  # Include the integrations folder for all functions
     - 'requirements.txt'
-    - '!__pycache__/**'
-    - '!*.pyc'
 
 functions:
   Oanda-Instrument-Config:
@@ -43,6 +39,16 @@ functions:
     package:
       patterns:
         - 'candle_extract.py'
+        - 'integrations/**'
+
+  Renko-Generation:
+    name: Renko-Generation
+    handler: renko_generation.lambda_handler
+    memorySize: 4096
+    ephemeralStorageSize: 2048
+    package:
+      patterns:
+        - 'renko_generation.py'
         - 'integrations/**'
 
 plugins:
