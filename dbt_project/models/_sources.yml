@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: candle_data
+    description: "Source data for the project"
+    database: production
+    schema: data
+    tables:
+      - name: hour1_renko_bricks
+      - name: oanda_hour1_forex_candles
