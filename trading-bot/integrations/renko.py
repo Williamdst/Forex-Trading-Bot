@@ -1,11 +1,15 @@
-import pandas as pd
-
-def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
+def generate_renko_bricks(
+    candles: list,
+    brick_config: dict,
+    return_dicts: bool = False
+):
+    print(candles)
     # The function recreates the entire renko dataset given the OHLC candles
-    df.columns = df.columns.str.lower()
+    candles = [{k.lower(): v for k, v in row.items()} for row in candles]
     brick_instrument = brick_config['instrument']
     brick_size = brick_config['brick_size']
     previous_candle_stats = {
+        'instrument': brick_instrument,
         'candle_open_time': None,
         'candle_close_time': None,
         'open': brick_config['artificial_brick_open'],
@@ -15,7 +19,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
     }
 
     renko_list = []
-    for index, row in df.iterrows():
+    for row in candles:
         current_candle_close_time = row['candle_close_time']
         current_close = row['mid_close']
 
@@ -39,6 +43,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
                 # For every candle
                 for i in range(brick_moves):
                     current_candle_stats = {
+                        'instrument': brick_instrument,
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['close'],
@@ -65,6 +70,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
 
                 for i in range(brick_moves):
                     current_candle_stats = {
+                        'instrument': brick_instrument,
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['open'],
@@ -75,6 +81,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
 
                     if i > 0:
                         current_candle_stats = {
+                            'instrument': brick_instrument,
                             'candle_open_time': previous_candle_stats['candle_open_time'],
                             'candle_close_time': current_candle_close_time,
                             'open': previous_candle_stats['close'],
@@ -96,6 +103,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
 
                 for i in range(brick_moves):
                     current_candle_stats = {
+                        'instrument': brick_instrument,
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['close'],
@@ -115,6 +123,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
 
                 for i in range(brick_moves):
                     current_candle_stats = {
+                        'instrument': brick_instrument,
                         'candle_open_time': previous_candle_stats['candle_close_time'],
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['open'],
@@ -125,6 +134,7 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
 
                     if i > 0:
                         current_candle_stats = {
+                            'instrument': brick_instrument,
                             'candle_open_time': previous_candle_stats['candle_open_time'],
                             'candle_close_time': current_candle_close_time,
                             'open': previous_candle_stats['close'],
@@ -136,17 +146,18 @@ def generate_renko_bricks(df: pd.DataFrame, brick_config: dict):
                     renko_list.append(current_candle_stats)
                     previous_candle_stats = current_candle_stats
 
-    renko_bricks = pd.DataFrame.from_dict(renko_list)
-    renko_bricks['instrument'] = brick_instrument
-    renko_bricks['high'] = renko_bricks[['open', 'close']].max(axis=1)
-    renko_bricks['low'] = renko_bricks[['open', 'close']].min(axis=1)
+    for i, brick in enumerate(renko_list):
+        brick['brick_number'] = i
+        brick['high'] = max(brick['open'], brick['close'])
+        brick['low'] = min(brick['open'], brick['close'])
 
-    renko_bricks.index.name = 'brick_number'
-    renko_bricks.sort_index(inplace=True)
-    renko_bricks.reset_index(inplace=True)
-    renko_bricks.columns = renko_bricks.columns.str.upper()
-
-    return renko_bricks[[
-        'INSTRUMENT', 'BRICK_NUMBER', 'CANDLE_OPEN_TIME', 'CANDLE_CLOSE_TIME',
-        'BRICK_TYPE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'STREAK_ORDER'
-    ]]
+    if return_dicts:
+        return renko_list
+    else:
+        return [
+            (
+                _['instrument'], _['candle_open_time'], _['candle_close_time'],
+                _['open'], _['close'], _['brick_type'], _['streak_order'],
+                _['brick_number'], _['high'], _['low']
+            ) for _ in renko_list
+        ]
