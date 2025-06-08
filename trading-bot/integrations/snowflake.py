@@ -1,4 +1,5 @@
 import snowflake.connector as snow
+from snowflake.connector import DictCursor
 
 class SnowflakeClient:
     def __init__(self, user, password, account, warehouse, database, schema):
@@ -11,15 +12,24 @@ class SnowflakeClient:
             schema=schema
         )
 
-    def run_query(self, query, use_pandas=False):
+    def run_query(self, query, use_pandas=False, use_dict_cursor=False):
         """Execute a SQL query and return the results as a list of tuples."""
         try:
+            if use_dict_cursor:
+                with self.connection.cursor(DictCursor) as cursor:
+                    cursor.execute(query)
+                    if use_pandas:
+                        return cursor.fetch_pandas_all()
+                    else:
+                        return cursor.fetchall()
+
             with self.connection.cursor() as cursor:
                 cursor.execute(query)
                 if use_pandas:
                     return cursor.fetch_pandas_all()
                 else:
                     return cursor.fetchall()
+
         except Exception as e:
             print(f"Error executing query: {e}")
             return None
@@ -28,11 +38,13 @@ class SnowflakeClient:
         """Close the connection."""
         self.connection.close()
 
+    # TODO: ADD BATCHING
     def execute_many(self, query, values):
         try:
             with self.connection.cursor() as cursor:
                 cursor.executemany(query, values)
                 self.connection.commit()
+                return cursor.fetchall()
         except Exception as e:
             print(f"Error executing query: {e}")
             return None
