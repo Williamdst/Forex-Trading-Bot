@@ -8,3 +8,10 @@ sources:
     tables:
       - name: hour1_renko_bricks
       - name: oanda_hour1_forex_candles
+
+  - name: application_data
+    description: "Application data for the project"
+    database: production
+    schema: application
+    tables:
+      - name: instruments
