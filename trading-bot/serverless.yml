@@ -5,7 +5,7 @@ service: trading-bot
 provider:
   name: aws
   runtime: python3.10
-  timeout: 300
+  timeout: 600
 
   environment:
     SNOWFLAKE_USERNAME: $env:SNOWFLAKE_USERNAME
@@ -19,37 +19,34 @@ package:
   individually: true
   patterns:
     - '!**'  # Exclude everything by default
-    - 'integrations/**'  # Include the integrations folder for all functions
+    - 'src/integrations/**'  # Include the integrations folder for all functions
     - 'requirements.txt'
 
 functions:
   Oanda-Instrument-Config:
     name: Oanda-Instrument-Config
-    handler: instrument_config.lambda_handler
+    handler: src/instrument_config.lambda_handler
     memorySize: 128
     package:
       patterns:
-        - 'instrument_config.py'
-        - 'integrations/**'
+        - 'src/instrument_config.py'
 
   Oanda-Candle-Extract:
     name: Oanda-Candle-Extract
-    handler: candle_extract.lambda_handler
+    handler: src/candle_extract.lambda_handler
     memorySize: 1024
     package:
       patterns:
-        - 'candle_extract.py'
-        - 'integrations/**'
+        - 'src/candle_extract.py'
 
   Renko-Generation:
     name: Renko-Generation
-    handler: renko_generation.lambda_handler
+    handler: src/renko_generation.lambda_handler
     memorySize: 4096
     ephemeralStorageSize: 2048
     package:
       patterns:
-        - 'renko_generation.py'
-        - 'integrations/**'
+        - 'src/renko_generation.py'
 
 plugins:
   - serverless-python-requirements
