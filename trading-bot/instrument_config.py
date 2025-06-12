@@ -28,7 +28,10 @@ def lambda_handler(event, context):
     )
 
     instruments = SNOWFLAKE.run_query(
-        "SELECT DISTINCT instrument FROM PRODUCTION.APPLICATION.INSTRUMENTS"
+        """
+        SELECT DISTINCT instrument FROM PRODUCTION.APPLICATION.INSTRUMENTS
+        WHERE is_active
+        """
     )
     return [_[0] for _ in instruments]
 
