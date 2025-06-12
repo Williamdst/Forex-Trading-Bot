@@ -35,6 +35,7 @@ class OandaClient:
         elif 'Unrecognized endpoint' in response.text:
             raise OandaEndpointError(response.text)
         else:
+            print(response.text)
             response.raise_for_status()
 
         return response
