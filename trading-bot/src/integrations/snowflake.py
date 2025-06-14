@@ -12,23 +12,17 @@ class SnowflakeClient:
             schema=schema
         )
 
-    def run_query(self, query, use_pandas=False, use_dict_cursor=False):
+    def run_query(self, query, use_dict_cursor=False):
         """Execute a SQL query and return the results as a list of tuples."""
         try:
             if use_dict_cursor:
                 with self.connection.cursor(DictCursor) as cursor:
                     cursor.execute(query)
-                    if use_pandas:
-                        return cursor.fetch_pandas_all()
-                    else:
-                        return cursor.fetchall()
+                    return cursor.fetchall()
 
             with self.connection.cursor() as cursor:
                 cursor.execute(query)
-                if use_pandas:
-                    return cursor.fetch_pandas_all()
-                else:
-                    return cursor.fetchall()
+                return cursor.fetchall()
 
         except Exception as e:
             print(f"Error executing query: {e}")
