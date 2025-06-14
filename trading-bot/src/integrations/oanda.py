@@ -7,27 +7,33 @@ class OandaEndpointError(Exception):
     pass
 
 class OandaClient:
-    def __init__(self, api_key, is_demo=True, account_id=None):
+    def __init__(self, api_key, account_id: str=None, is_live: bool=False):
         self.api_key = api_key
         self.account_id = account_id
         self.base_url = (
-            "https://api-fxpractice.oanda.com/v3" if is_demo
-            else "https://api-fxtrade.oanda.com/v3"
+            "https://api-fxtrade.oanda.com/v3" if is_live
+            else "https://api-fxpractice.oanda.com/v3"
         )
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}"
-        }
 
         if account_id:
             self.base_url = f"{self.base_url}/accounts/{self.account_id}"
 
-    def send_request(self, endpoint: str, method: str, params=None, data=None):
+    # TODO: DECRYPT THE API KEY ON THE REQUEST
+    def send_request(
+        self,
+        endpoint: str,
+        method: str,
+        params: dict=None,
+        data=None
+    ):
         response = requests.request(
-            method,
-            url=endpoint,
-            headers=self.headers,
+            method=method,
+            url=f'{self.base_url}/{endpoint}',
             params=params,
-            json=data
+            json=data,
+            headers={
+                "Authorization": f"Bearer {self.api_key}"
+            }
         )
 
         if 'Insufficient authorization' in response.text:
@@ -35,7 +41,6 @@ class OandaClient:
         elif 'Unrecognized endpoint' in response.text:
             raise OandaEndpointError(response.text)
         else:
-            print(response.text)
             response.raise_for_status()
 
         return response

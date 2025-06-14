@@ -65,7 +65,7 @@ def lambda_handler(event, context):
 
     candle_data = OANDA.send_request(
         method='GET',
-        endpoint=OANDA.base_url + f'/instruments/{instrument}/candles',
+        endpoint=f'instruments/{instrument}/candles',
         params=params
     ).json()
 
