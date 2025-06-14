@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from integrations.snowflake import SnowflakeClient
+from infrastructure.snowflake import SnowflakeClient
 
 load_dotenv()
 SNOWFLAKE = SnowflakeClient(

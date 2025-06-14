@@ -6,8 +6,7 @@ except ImportError:
 import os
 from dotenv import load_dotenv
 
-from integrations.snowflake import SnowflakeClient
-from integrations.renko import generate_renko_bricks
+from infrastructure.snowflake import SnowflakeClient
 
 load_dotenv()
 SNOWFLAKE = SnowflakeClient(

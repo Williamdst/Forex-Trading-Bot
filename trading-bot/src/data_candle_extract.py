@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-from integrations.oanda import OandaClient
-from integrations.snowflake import SnowflakeClient
+from infrastructure.oanda import OandaClient
+from infrastructure.snowflake import SnowflakeClient
 
 load_dotenv()
 SNOWFLAKE = SnowflakeClient(

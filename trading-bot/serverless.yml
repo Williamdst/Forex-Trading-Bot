@@ -21,7 +21,8 @@ package:
   individually: true
   patterns:
     - '!**'  # Exclude everything by default
-    - 'src/integrations/**'  # Include the integrations folder for all functions
+    - 'src/integrations/**'
+    - 'src/infrastructure/**'
     - 'requirements.txt'
 
 functions:
