@@ -16,8 +16,8 @@ join_renko_to_ohlc as (
 
   SELECT
     ohlc.*,
-    bricks.candle_close_time as brick_close_time,
     bricks.candle_open_time as brick_open_time,
+    bricks.candle_close_time as brick_close_time,
     bricks.brick_type,
     bricks.open as brick_open,
     bricks.high as brick_high,
