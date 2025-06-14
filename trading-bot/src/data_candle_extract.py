@@ -5,7 +5,20 @@ from integrations.oanda import OandaClient
 from integrations.snowflake import SnowflakeClient
 
 load_dotenv()
+SNOWFLAKE = SnowflakeClient(
+    user=os.environ["SNOWFLAKE_USERNAME"],
+    password=os.environ["SNOWFLAKE_PASSWORD"],
+    account=os.environ["SNOWFLAKE_ACCOUNT"],
+    database=os.environ["SNOWFLAKE_DATABASE"],
+    schema=os.environ["SNOWFLAKE_SCHEMA"],
+    warehouse="compute_wh"
+)
 
+OANDA = OandaClient(
+    api_key=os.getenv("OANDA_API_KEY"),
+    account_id='001-001-10122498-001',
+    is_live=True
+)
 
 def lambda_handler(event, context):
     """
@@ -24,32 +37,11 @@ def lambda_handler(event, context):
     except KeyError:
         pass
 
-    SNOWFLAKE = SnowflakeClient(
-        user=os.environ["SNOWFLAKE_USERNAME"],
-        password=os.environ["SNOWFLAKE_PASSWORD"],
-        account=os.environ["SNOWFLAKE_ACCOUNT"],
-        database=os.environ["SNOWFLAKE_DATABASE"],
-        schema=os.environ["SNOWFLAKE_SCHEMA"],
-        warehouse="compute_wh"
-    )
-
-    OANDA = OandaClient(
-        api_key=os.getenv("OANDA_API_KEY"),
-        account_id='001-001-10122498-001',
-        is_demo=False
-    )
-
-    try:
-        instrument = event['instrument'].upper()
-        granularity = event.get('granularity', 'H1').upper()
-        count = event.get('count', 2)
-        from_date = event.get('from_date', None)
-        to_date = event.get('to_date', None)
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': 'Missing required parameters'
-        }
+    instrument = event['instrument'].upper()
+    granularity = event.get('granularity', 'H1').upper()
+    count = event.get('count', 2)
+    from_date = event.get('from_date', None)
+    to_date = event.get('to_date', None)
 
     params = {
         'price': 'MBA',
