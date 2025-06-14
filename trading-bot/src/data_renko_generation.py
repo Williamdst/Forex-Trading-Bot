@@ -10,6 +10,14 @@ from integrations.snowflake import SnowflakeClient
 from integrations.renko import generate_renko_bricks
 
 load_dotenv()
+SNOWFLAKE = SnowflakeClient(
+    user=os.environ["SNOWFLAKE_USERNAME"],
+    password=os.environ["SNOWFLAKE_PASSWORD"],
+    account=os.environ["SNOWFLAKE_ACCOUNT"],
+    database=os.environ["SNOWFLAKE_DATABASE"],
+    schema=os.environ["SNOWFLAKE_SCHEMA"],
+    warehouse="compute_wh"
+)
 
 def lambda_handler(event, context):
     """
@@ -20,22 +28,7 @@ def lambda_handler(event, context):
     except KeyError:
         pass
 
-    SNOWFLAKE = SnowflakeClient(
-        user=os.environ["SNOWFLAKE_USERNAME"],
-        password=os.environ["SNOWFLAKE_PASSWORD"],
-        account=os.environ["SNOWFLAKE_ACCOUNT"],
-        database=os.environ["SNOWFLAKE_DATABASE"],
-        schema=os.environ["SNOWFLAKE_SCHEMA"],
-        warehouse="compute_wh"
-    )
-
-    try:
-        instrument = event['instrument'].upper()
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': 'Missing required parameters'
-        }
+    instrument = event['instrument'].upper()
 
     ohlc_data = SNOWFLAKE.run_query(
         query=(f"""
