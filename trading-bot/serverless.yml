@@ -6,6 +6,8 @@ provider:
   name: aws
   runtime: python3.10
   timeout: 600
+  iam:
+    role: arn:aws:iam::088357769461:role/dbt-Masterclass-Serverless-Role
 
   environment:
     SNOWFLAKE_USERNAME: $env:SNOWFLAKE_USERNAME
@@ -29,7 +31,7 @@ functions:
     memorySize: 128
     package:
       patterns:
-        - 'src/instrument_config.py'
+        - 'src/data_instrument_config.py'
 
   Oanda-Candle-Extract:
     name: Oanda-Candle-Extract
@@ -37,7 +39,7 @@ functions:
     memorySize: 1024
     package:
       patterns:
-        - 'src/candle_extract.py'
+        - 'src/data_candle_extract.py'
 
   Renko-Generation:
     name: Renko-Generation
@@ -46,7 +48,23 @@ functions:
     ephemeralStorageSize: 2048
     package:
       patterns:
-        - 'src/renko_generation.py'
+        - 'src/data_renko_generation.py'
+
+  Trade-Instrument-Config:
+    name: Trade-Instrument-Config
+    handler: src/trade_instrument_config.lambda_handler
+    memorySize: 128
+    package:
+      patterns:
+        - 'src/trade_instrument_config.py'
+
+  Trade-Account-Config:
+    name: Trade-Account-Config
+    handler: src/trade_account_config.lambda_handler
+    memorySize: 128
+    package:
+      patterns:
+        - 'src/trade_account_config.py'
 
 plugins:
   - serverless-python-requirements
