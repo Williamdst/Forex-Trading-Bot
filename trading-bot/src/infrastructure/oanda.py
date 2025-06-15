@@ -44,29 +44,3 @@ class OandaClient:
             response.raise_for_status()
 
         return response
-
-
-class PositionSizerService:
-    def __init__(self, oanda_client: OandaClient):
-        self.oanda = oanda_client
-
-    # def size_position_for_instrument(
-    #     self, instrument: str, sizing_type: str, sizing_value: float
-    # ) -> int:
-    #     account_balance = self.get_account_balance()
-    #     conversion_rate = self.get_conversion_rate(instrument)
-    #     return size_position(account_balance, instrument, sizing_type, sizing_value, conversion_rate)
-    #
-    # def get_account_balance(self) -> float:
-    #     # Example endpoint: /accounts/{accountID}/summary
-    #     response = self.oanda.send_request(
-    #         endpoint=f"{self.oanda.base_url}/summary",
-    #         method="GET"
-    #     )
-    #     return float(response.json()["account"]["balance"])
-    #
-    # def get_conversion_rate(self, instrument: str) -> float:
-    #     # Example: get exchange rate for USD_CAD if instrument is USD_CAD
-    #     # You may need to derive a conversion pair from the instrument name
-    #     # and call /pricing or /instruments endpoint
-    #     raise NotImplementedError("Add logic to fetch FX rate if needed")
