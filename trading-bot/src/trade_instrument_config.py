@@ -19,18 +19,20 @@ def lambda_handler(event, context):
     """
     """
     instruments = SNOWFLAKE.run_query(
-        """
+        query="""
         SELECT
-          d.instrument
+          d.instrument,
+          d.brick_type
         FROM PRODUCTION.DATA.TS_HOUR1_RENKO_OHLC AS d
         INNER JOIN PRODUCTION.APPLICATION.INSTRUMENTS AS i
           ON d.instrument = i.instrument
         WHERE i.is_active
           AND d.is_candle_complete = FALSE
           AND d.did_direction_shift = TRUE
-        """
+        """,
+        use_dict_cursor=True
     )
-    return [_[0] for _ in instruments]
+    return instruments
 
 if __name__ == "__main__":
     test_event = {}
