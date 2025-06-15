@@ -14,7 +14,9 @@ trend_group_totals as (
 select
   instrument,
   trend_group,
-  sum(t.bricks_made) - 2 as total_bricks_made
+  SUM(t.bricks_made) - 2 as total_bricks_made,
+  MIN(candle_open_time) AS group_open_time,
+  MAX(candle_close_time) as group_close_time,
 from brick_num_assignment as t
 group by instrument, trend_group
 
