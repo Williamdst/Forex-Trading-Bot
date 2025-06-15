@@ -20,15 +20,16 @@ provider:
 package:
   individually: true
   patterns:
-    - '!**'  # Exclude everything by default
-    - 'src/integrations/**'
+    - '!**'
     - 'src/infrastructure/**'
+    - 'src/domain/**'
+    - 'src/services/**'
     - 'requirements.txt'
 
 functions:
   Oanda-Instrument-Config:
     name: Oanda-Instrument-Config
-    handler: src/instrument_config.lambda_handler
+    handler: src/data_instrument_config.lambda_handler
     memorySize: 128
     package:
       patterns:
@@ -36,7 +37,7 @@ functions:
 
   Oanda-Candle-Extract:
     name: Oanda-Candle-Extract
-    handler: src/candle_extract.lambda_handler
+    handler: src/data_candle_extract.lambda_handler
     memorySize: 1024
     package:
       patterns:
@@ -44,7 +45,7 @@ functions:
 
   Renko-Generation:
     name: Renko-Generation
-    handler: src/renko_generation.lambda_handler
+    handler: src/data_renko_generation.lambda_handler
     memorySize: 4096
     ephemeralStorageSize: 2048
     package:
