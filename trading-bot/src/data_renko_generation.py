@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 from infrastructure.snowflake import SnowflakeClient
-from integrations.renko import generate_renko_bricks
+from domain.renko_generator import generate_renko_bricks
 
 load_dotenv()
 SNOWFLAKE = SnowflakeClient(

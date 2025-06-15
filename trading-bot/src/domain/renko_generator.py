@@ -3,7 +3,6 @@ def generate_renko_bricks(
     brick_config: dict,
     return_dicts: bool = False
 ):
-    print(candles)
     # The function recreates the entire renko dataset given the OHLC candles
     candles = [{k.lower(): v for k, v in row.items()} for row in candles]
     brick_instrument = brick_config['instrument']
