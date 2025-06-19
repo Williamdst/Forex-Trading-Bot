@@ -37,11 +37,11 @@ def lambda_handler(event, context):
     except KeyError:
         pass
 
-    instrument = event['instrument'].upper()
-    granularity = event.get('granularity', 'H1').upper()
-    count = event.get('count', 2)
-    from_date = event.get('from_date', None)
-    to_date = event.get('to_date', None)
+    instrument = event['INSTRUMENT'].upper()
+    granularity = event.get('GRANULARITY', 'H1').upper()
+    count = event.get('COUNT', 2)
+    from_date = event.get('FROM_DATE', None)
+    to_date = event.get('TO_DATE', None)
 
     params = {
         'price': 'MBA',
@@ -105,10 +105,10 @@ if __name__ == "__main__":
         'AUD_USD', 'NZD_USD', 'USD_JPY'
     ]:
         test_event = {
-            'instrument': instrument,
-            'granularity': 'H1',
-            'count': 10
-            # 'from_date': '2025-05-01T00:00:00Z'
+            'INSTRUMENT': instrument,
+            'GRANULARITY': 'H1',
+            'COUNT': 1
+            # 'FROM_DATE': '2025-05-01T00:00:00Z'
         }
         result = lambda_handler(test_event, None)
 
