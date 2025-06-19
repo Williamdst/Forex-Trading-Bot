@@ -25,6 +25,7 @@ join_renko_to_ohlc as (
     bricks.close as brick_close,
     bricks.streak_order,
     bricks.trend_group,
+    bricks.brick_number,
     bricks.did_direction_shift
   FROM dim_oanda_hour1_candles as ohlc
   LEFT JOIN hour1_renko_bricks as bricks
