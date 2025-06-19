@@ -24,8 +24,8 @@ class OandaClient:
         endpoint: str,
         method: str,
         params: dict=None,
-        data=None
-    ):
+        data: dict=None
+    ) -> requests.Response:
         response = requests.request(
             method=method,
             url=f'{self.base_url}/{endpoint}',
