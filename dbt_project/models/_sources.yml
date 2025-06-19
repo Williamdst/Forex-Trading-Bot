@@ -3,7 +3,12 @@ version: 2
 sources:
   - name: candle_data
     description: "Source data for the project"
-    database: production
+    database: >-
+      {%- if target.name == 'dev' -%}
+        development
+      {%- else -%}
+        production
+      {%- endif -%}
     schema: data
     tables:
       - name: hour1_renko_bricks
@@ -11,7 +16,12 @@ sources:
 
   - name: application_data
     description: "Application data for the project"
-    database: production
+    database: >-
+      {%- if target.name == 'dev' -%}
+        development
+      {%- else -%}
+        production
+      {%- endif -%}
     schema: application
     tables:
       - name: instruments
