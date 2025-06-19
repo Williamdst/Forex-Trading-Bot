@@ -68,6 +68,14 @@ functions:
       patterns:
         - 'src/trade_account_config.py'
 
+  Trade-Execute-Trade:
+    name: Trade-Execute-Trade
+    handler: src/trade_execute_trade.lambda_handler
+    memorySize: 128
+    package:
+      patterns:
+        - 'src/trade_execute_trade.py'
+
 plugins:
   - serverless-python-requirements
   - serverless-prune-plugin
@@ -79,4 +87,4 @@ custom:
     dockerizePip: true
   prune:
     automatic: true
-    number: 3  # Keep only the 3 most recent versions
+    number: 3
