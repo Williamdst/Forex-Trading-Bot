@@ -28,7 +28,13 @@ join_renko_to_ohlc as (
     bricks.brick_number,
     bricks.did_direction_shift
   FROM dim_oanda_hour1_candles as ohlc
+
+  {%- if target.name == 'dev' %}
+  INNER JOIN hour1_renko_bricks as bricks
+  {% else %}
   LEFT JOIN hour1_renko_bricks as bricks
+  {% endif -%}
+
     ON ohlc.candle_open_time = bricks.candle_close_time
    AND ohlc.instrument = bricks.instrument
 
