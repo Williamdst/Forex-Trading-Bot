@@ -27,7 +27,7 @@ def generate_renko_bricks(
         # previous one in the series. The strategy for determining the next
         # renko candles is the same, but the logic is reversed along with some
         # of the values that need to be used.
-        if previous_candle_stats['brick_type'] == 'long':
+        if previous_candle_stats['brick_type'] == 'LONG':
             # Set the values that determine the thresholds for the next candle
             long_contd = previous_candle_stats['close'] + brick_size
             short_rvrsl = previous_candle_stats['open'] - brick_size
@@ -47,7 +47,7 @@ def generate_renko_bricks(
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['close'],
                         'close': previous_candle_stats['close'] + brick_size,
-                        'brick_type': 'long',
+                        'brick_type': 'LONG',
                         'streak_order': i
                     }
 
@@ -74,7 +74,7 @@ def generate_renko_bricks(
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['open'],
                         'close': previous_candle_stats['open'] - brick_size,
-                        'brick_type': 'short',
+                        'brick_type': 'SHORT',
                         'streak_order': i
                     }
 
@@ -85,7 +85,7 @@ def generate_renko_bricks(
                             'candle_close_time': current_candle_close_time,
                             'open': previous_candle_stats['close'],
                             'close': previous_candle_stats['close'] - brick_size,
-                            'brick_type': 'short',
+                            'brick_type': 'SHORT',
                             'streak_order': i
                         }
 
@@ -93,7 +93,7 @@ def generate_renko_bricks(
                     previous_candle_stats = current_candle_stats
 
         # Short Renko Candles
-        elif previous_candle_stats['brick_type'] == 'short':
+        elif previous_candle_stats['brick_type'] == 'SHORT':
             short_contd = previous_candle_stats['close'] - brick_size
             long_rvrsl = previous_candle_stats['open'] + brick_size
 
@@ -107,7 +107,7 @@ def generate_renko_bricks(
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['close'],
                         'close': previous_candle_stats['close'] - brick_size,
-                        'brick_type': 'short',
+                        'brick_type': 'SHORT',
                         'streak_order': i
                     }
 
@@ -127,7 +127,7 @@ def generate_renko_bricks(
                         'candle_close_time': current_candle_close_time,
                         'open': previous_candle_stats['open'],
                         'close': previous_candle_stats['open'] + brick_size,
-                        'brick_type': 'long',
+                        'brick_type': 'LONG',
                         'streak_order': i
                     }
 
@@ -138,7 +138,7 @@ def generate_renko_bricks(
                             'candle_close_time': current_candle_close_time,
                             'open': previous_candle_stats['close'],
                             'close': previous_candle_stats['close'] + brick_size,
-                            'brick_type': 'long',
+                            'brick_type': 'LONG',
                             'streak_order': i
                         }
 
