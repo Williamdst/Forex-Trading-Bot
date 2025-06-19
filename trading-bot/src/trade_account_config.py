@@ -30,28 +30,21 @@ def lambda_handler(event, context):
     instrument = event['INSTRUMENT'].upper()
     account_configs = SNOWFLAKE.run_query(
         query=(f"""
-            SELECT
-              a.account_id,
-              a.platform_id,
-              i.instrument,
-              a.api_key_id,
-              a.is_live_account,
-              aic.position_sizing_type,
-              aic.position_sizing_value
+            SELECT DISTINCT
+              a.account_id
             FROM PRODUCTION.APPLICATION.ACCOUNTS AS a
             LEFT JOIN PRODUCTION.APPLICATION.account_instruments_config AS aic
               ON a.account_id = aic.account_id
-            LEFT JOIN production.application.instruments as i
+            LEFT JOIN PRODUCTION.APPLICATION.INSTRUMENTS as i
               ON aic.instrument_id = i.instrument_id
             WHERE a.is_active
               AND aic.is_active
               AND i.instrument = '{instrument}'
         """
-        ),
-        use_dict_cursor=True
+        )
     )
 
-    return account_configs
+    return [_[0] for _ in account_configs]
 
 
 if __name__ == "__main__":
