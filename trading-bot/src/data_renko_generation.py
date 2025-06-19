@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     except KeyError:
         pass
 
-    instrument = event['instrument'].upper()
+    instrument = event['INSTRUMENT'].upper()
 
     ohlc_data = SNOWFLAKE.run_query(
         query=(f"""
@@ -95,7 +95,11 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    test_event = {
-        'instrument': 'EUR_USD'
-    }
-    print(lambda_handler(test_event, None))
+    for instrument in [
+        'EUR_USD', 'USD_CAD', 'GBP_USD', 'USD_CHF',
+        'AUD_USD', 'NZD_USD', 'USD_JPY'
+    ]:
+        test_event = {
+            'INSTRUMENT': instrument
+        }
+        print(lambda_handler(test_event, None))
