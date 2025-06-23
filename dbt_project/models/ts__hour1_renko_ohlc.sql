@@ -37,7 +37,7 @@ join_renko_to_ohlc as (
   LEFT JOIN hour1_renko_bricks as bricks
   {% endif -%}
 
-    ON ohlc.candle_open_time = bricks.candle_close_time
+    ON ohlc.candle_close_time = bricks.candle_close_time
    AND ohlc.instrument = bricks.instrument
 
 )
