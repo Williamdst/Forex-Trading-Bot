@@ -22,13 +22,13 @@ def lambda_handler(event, context):
         query="""
         SELECT
           d.instrument,
-          d.brick_type as direction
-        FROM PRODUCTION.DATA.TS_HOUR1_RENKO_OHLC AS d
+          d.trade_execution_type as direction
+        FROM PRODUCTION.DATA.TS__HOUR1_RENKO_OHLC AS d
         INNER JOIN PRODUCTION.APPLICATION.INSTRUMENTS AS i
           ON d.instrument = i.instrument
         WHERE i.is_active
           AND d.is_candle_complete = FALSE
-          AND d.did_direction_shift = TRUE
+          AND d.execute_trade_flag = TRUE
         """,
         use_dict_cursor=True
     )

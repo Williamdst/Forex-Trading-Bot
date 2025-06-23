@@ -40,7 +40,31 @@ join_renko_to_ohlc as (
     ON ohlc.candle_close_time = bricks.candle_close_time
    AND ohlc.instrument = bricks.instrument
 
+),
+
+exeuction_flagging AS (
+
+  SELECT
+
+    *,
+    lag(brick_type) over (
+      partition by instrument
+      order by candle_open_time asc
+    ) as trade_execution_type,
+
+    lag(did_direction_shift) over (
+      partition by instrument
+      order by candle_open_time asc
+    ) as execute_trade_flag,
+
+    lag(trend_group) over (
+      partition by instrument
+      order by candle_open_time asc
+    ) as execute_trend_group
+
+  FROM join_renko_to_ohlc
+
 )
 
-select * from join_renko_to_ohlc
-order by candle_open_time desc
+SELECT * FROM exeuction_flagging
+ORDER BY candle_open_time DESC
