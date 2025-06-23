@@ -33,7 +33,7 @@ def lambda_handler(event, context):
             SELECT DISTINCT
               a.account_id
             FROM PRODUCTION.APPLICATION.ACCOUNTS AS a
-            LEFT JOIN PRODUCTION.APPLICATION.account_instruments_config AS aic
+            LEFT JOIN PRODUCTION.APPLICATION.ACCOUNT_INSTRUMENTS_CONFIG AS aic
               ON a.account_id = aic.account_id
             LEFT JOIN PRODUCTION.APPLICATION.INSTRUMENTS as i
               ON aic.instrument_id = i.instrument_id

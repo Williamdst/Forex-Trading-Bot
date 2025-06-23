@@ -34,7 +34,7 @@ class ConfigProvider:
                   aic.position_sizing_type,
                   aic.position_sizing_value
                 FROM PRODUCTION.APPLICATION.INSTRUMENTS as i
-                LEFT JOIN PRODUCTION.APPLICATION.account_instruments_config as aic
+                LEFT JOIN PRODUCTION.APPLICATION.ACCOUNT_INSTRUMENTS_CONFIG as aic
                   ON i.instrument_id = aic.instrument_id
                 WHERE i.instrument = '{instrument}'
                   AND aic.account_id = '{account_id}'
