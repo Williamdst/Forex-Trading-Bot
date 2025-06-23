@@ -25,3 +25,4 @@ sources:
     schema: application
     tables:
       - name: instruments
+      - name: account_logs
