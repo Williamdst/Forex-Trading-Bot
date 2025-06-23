@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     account_id = event['ACCOUNT_ID']
     instrument = event['INSTRUMENT']
     direction = event['DIRECTION']
-    print(f'running for instrument {instrument} for account {account_id} in direction {direction}')
+    brick_num = event.get('BRICK_NUM')
 
     config_service = ConfigProvider(SNOWFLAKE)
     oanda_credentials = config_service.get_account_credentials(
@@ -57,20 +57,19 @@ def lambda_handler(event, context):
     trade_service.close_position_for_instrument(instrument=instrument)
     trade_service.open_market_position_for_instrument(
         instrument=instrument,
-        trade_size_units=trade_size_units
+        trade_size_units=trade_size_units,
+        brick_num=brick_num
     )
 
     return None
 
 
 if __name__ == "__main__":
-    for instrument in [
-        'EUR_USD', 'USD_CAD', 'GBP_USD', 'USD_CHF',
-        'AUD_USD', 'NZD_USD', 'USD_JPY'
-    ]:
-        test_event = {
-            'ACCOUNT_ID': 1,
-            'INSTRUMENT': instrument,
-            'DIRECTION': 'LONG',
-        }
-        lambda_handler(test_event, None)
+    instrument = 'EUR_USD'
+    test_event = {
+        'ACCOUNT_ID': 2,
+        'INSTRUMENT': instrument,
+        'DIRECTION': 'LONG',
+        'BRICK_NUM': 12345
+    }
+    lambda_handler(test_event, None)

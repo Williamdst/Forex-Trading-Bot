@@ -57,6 +57,11 @@ exeuction_flagging AS (
       order by candle_open_time asc
     ) as execute_trade_flag,
 
+    lag(brick_number) over (
+      partition by instrument
+      order by candle_open_time asc
+    ) as execute_brick_number,
+
     lag(trend_group) over (
       partition by instrument
       order by candle_open_time asc

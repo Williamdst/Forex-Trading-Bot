@@ -22,7 +22,8 @@ def lambda_handler(event, context):
         query="""
         SELECT
           d.instrument,
-          d.trade_execution_type as direction
+          d.trade_execution_type as direction,
+          d.execute_brick_number AS brick_num
         FROM PRODUCTION.DATA.TS__HOUR1_RENKO_OHLC AS d
         INNER JOIN PRODUCTION.APPLICATION.INSTRUMENTS AS i
           ON d.instrument = i.instrument

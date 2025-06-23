@@ -33,11 +33,12 @@ parse_data AS (
     transactions.value['tradeOpened']::variant as trade_json,
 
 
-    transactions.value::variant as raw_data,
+    transactions.value['clientExtensions']['id']::varchar as client_extension_id,
+    transactions.value['clientExtensions']['tag']::varchar as client_extension_tag,
     transactions.value['requestID']::varchar as request_id,
     transactions.value['userID']::varchar as user_id,
     transactions.value['time']::timestamp as transaction_time,
-
+    transactions.value::variant as raw_data,
     source_data.filename,
     source_data.file_last_modified
   FROM source_data,

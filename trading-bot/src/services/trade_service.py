@@ -36,8 +36,16 @@ class TradeManager:
     def open_market_position_for_instrument(
         self,
         instrument: str,
-        trade_size_units: int
+        trade_size_units: int,
+        brick_num: int=None
     ) -> None:
+        client_extensions = {
+            'tag': 'renko_trading_bot'
+        }
+
+        if brick_num is not None:
+            client_extensions['id'] = f'{instrument}_{brick_num}'
+
         self.oanda.send_request(
             method='POST',
             endpoint='orders',
@@ -46,7 +54,8 @@ class TradeManager:
                     'type': 'MARKET',
                     'timeInForce': 'FOK',
                     'units': trade_size_units,
-                    'instrument': instrument
+                    'instrument': instrument,
+                    'clientExtensions': client_extensions
                 }
             }
-        ).json()
+        )
