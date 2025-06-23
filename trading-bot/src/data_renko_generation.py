@@ -33,7 +33,7 @@ def lambda_handler(event, context):
     ohlc_data = SNOWFLAKE.run_query(
         query=(f"""
             SELECT * 
-            FROM PRODUCTION.DATA.DIM_OANDA_HOUR1_FOREX_CANDLES
+            FROM PRODUCTION.DATA.OANDA__HOUR1_FOREX_CANDLES
             WHERE instrument = '{instrument}' 
                 AND is_candle_complete 
             ORDER BY candle_open_time ASC

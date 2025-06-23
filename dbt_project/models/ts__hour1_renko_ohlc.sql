@@ -2,19 +2,20 @@ with
 
 hour1_renko_bricks as (
 
-  SELECT * FROM {{ ref('dim_oanda_hour1_renko_bricks_deduped') }}
+  SELECT * FROM {{ ref('oanda__hour1_renko_bricks_deduped') }}
 
 ),
 
 dim_oanda_hour1_candles as (
 
-  SELECT * FROM {{ ref('dim_oanda_hour1_forex_candles') }}
+  SELECT * FROM {{ ref('oanda__hour1_forex_candles') }}
 
 ),
 
 join_renko_to_ohlc as (
 
   SELECT
+
     ohlc.*,
     bricks.candle_open_time as brick_open_time,
     bricks.candle_close_time as brick_close_time,
@@ -27,6 +28,7 @@ join_renko_to_ohlc as (
     bricks.trend_group,
     bricks.brick_number,
     bricks.did_direction_shift
+
   FROM dim_oanda_hour1_candles as ohlc
 
   {%- if target.name == 'dev' %}
