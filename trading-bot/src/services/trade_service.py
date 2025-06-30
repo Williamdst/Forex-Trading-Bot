@@ -4,7 +4,15 @@ class TradeManager:
     def __init__(self, oanda_client: OandaClient):
         self.oanda = oanda_client
 
-    def close_position_for_instrument(self, instrument: str) -> None:
+    def close_position_for_instrument(
+        self,
+        instrument: str,
+        brick_num: int=None
+    ) -> None:
+        client_extensions = {'tag': 'renko_trading_bot'}
+        if brick_num is not None:
+            client_extensions['id'] = f'{instrument}_{brick_num}'
+
         response = self.oanda.send_request(
             method='GET',
             endpoint=f'positions'
@@ -19,14 +27,20 @@ class TradeManager:
                     self.oanda.send_request(
                         method='PUT',
                         endpoint=f'positions/{instrument}/close',
-                        data={'longUnits': 'ALL'}
+                        data={
+                            'longUnits': 'ALL',
+                            'longClientExtensions': client_extensions
+                        }
                     )
 
                 if short_positions != 0:
                     self.oanda.send_request(
                         method='PUT',
                         endpoint=f'positions/{instrument}/close',
-                        data={'shortUnits': 'ALL'}
+                        data={
+                            'shortUnits': 'ALL',
+                            'shortClientExtensions': client_extensions
+                        }
                     )
             else:
                 continue
@@ -39,10 +53,7 @@ class TradeManager:
         trade_size_units: int,
         brick_num: int=None
     ) -> None:
-        client_extensions = {
-            'tag': 'renko_trading_bot'
-        }
-
+        client_extensions = {'tag': 'renko_trading_bot'}
         if brick_num is not None:
             client_extensions['id'] = f'{instrument}_{brick_num}'
 

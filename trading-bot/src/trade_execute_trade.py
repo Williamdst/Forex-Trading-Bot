@@ -54,7 +54,10 @@ def lambda_handler(event, context):
     )
 
     trade_service = TradeManager(OANDA)
-    trade_service.close_position_for_instrument(instrument=instrument)
+    trade_service.close_position_for_instrument(
+        instrument=instrument,
+        brick_num=brick_num
+    )
     trade_service.open_market_position_for_instrument(
         instrument=instrument,
         trade_size_units=trade_size_units,
@@ -67,9 +70,9 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     instrument = 'EUR_USD'
     test_event = {
-        'ACCOUNT_ID': 2,
+        'ACCOUNT_ID': 1,
         'INSTRUMENT': instrument,
-        'DIRECTION': 'LONG',
-        'BRICK_NUM': 12345
+        'DIRECTION': 'SHORT',
+        'BRICK_NUM': 54321
     }
     lambda_handler(test_event, None)
