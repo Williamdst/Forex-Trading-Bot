@@ -85,6 +85,8 @@ custom:
   pythonRequirements:
     slim: true
     dockerizePip: true
+    useDownloadCache: false
+    useStaticCache: false
   prune:
     automatic: true
     number: 3
