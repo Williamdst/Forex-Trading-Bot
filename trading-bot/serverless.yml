@@ -76,6 +76,14 @@ functions:
       patterns:
         - 'src/trade_execute_trade.py'
 
+  Trade-Transaction-Logging:
+    name: Trade-Transaction-Logging
+    handler: src/trade_transaction_logging.lambda_handler
+    memorySize: 128
+    package:
+      patterns:
+        - 'src/trade_transaction_logging.py'
+
 plugins:
   - serverless-python-requirements
   - serverless-prune-plugin
