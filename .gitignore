@@ -5,3 +5,25 @@ logs/
 
 dbt_project/.user.yml
 dbt_project/profiles.yml
+
+
+.Python
+trading-bot/env/
+trading-bot/build/
+trading-bot/develop-eggs/
+trading-bot/dist/
+trading-bot/downloads/
+trading-bot/eggs/
+trading-bot/.eggs/
+trading-bot/lib/
+trading-bot/lib64/
+trading-bot/parts/
+trading-bot/sdist/
+trading-bot/var/
+trading-bot/*.egg-info/
+trading-bot/.installed.cfg
+trading-bot/*.egg
+trading-bot/.env
+
+# Serverless directories
+trading-bot/.serverless
