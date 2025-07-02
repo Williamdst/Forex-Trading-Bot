@@ -29,6 +29,7 @@ def lambda_handler(event, context):
     account_id = event['ACCOUNT_ID']
     instrument = event['INSTRUMENT']
     direction = event['DIRECTION']
+    entry_price = event['ENTRY_PRICE']
     brick_num = event.get('BRICK_NUM')
 
     config_service = ConfigProvider(SNOWFLAKE)
@@ -54,13 +55,17 @@ def lambda_handler(event, context):
     )
 
     trade_service = TradeManager(OANDA)
+    trade_service.close_pending_orders_for_instrument(
+        instrument=instrument
+    )
     trade_service.close_position_for_instrument(
         instrument=instrument,
         brick_num=brick_num
     )
-    trade_service.open_market_position_for_instrument(
+    trade_service.open_limit_position_for_instrument(
         instrument=instrument,
         trade_size_units=trade_size_units,
+        limit_price=entry_price,
         brick_num=brick_num
     )
 
@@ -73,6 +78,7 @@ if __name__ == "__main__":
         'ACCOUNT_ID': 1,
         'INSTRUMENT': instrument,
         'DIRECTION': 'SHORT',
-        'BRICK_NUM': 54321
+        'BRICK_NUM': 54321,
+        'ENTRY_PRICE': 1.18050
     }
     lambda_handler(test_event, None)

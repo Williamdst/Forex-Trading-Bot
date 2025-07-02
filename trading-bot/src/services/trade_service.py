@@ -4,6 +4,26 @@ class TradeManager:
     def __init__(self, oanda_client: OandaClient):
         self.oanda = oanda_client
 
+    def close_pending_orders_for_instrument(
+        self,
+        instrument: str
+    ) -> None:
+        response = self.oanda.send_request(
+            method='GET',
+            endpoint='pendingOrders'
+        ).json()
+
+        for order in response['orders']:
+            if order['instrument'] == instrument:
+                self.oanda.send_request(
+                    method='PUT',
+                    endpoint=f"orders/{order['id']}/cancel"
+                )
+            else:
+                continue
+
+        return None
+
     def close_position_for_instrument(
         self,
         instrument: str,
@@ -67,6 +87,33 @@ class TradeManager:
                     'units': trade_size_units,
                     'instrument': instrument,
                     'clientExtensions': client_extensions
+                }
+            }
+        )
+
+    def open_limit_position_for_instrument(
+        self,
+        instrument: str,
+        trade_size_units: int,
+        limit_price: float,
+        brick_num: int=None
+    ) -> None:
+        client_extensions = {'tag': 'renko_trading_bot'}
+        if brick_num is not None:
+            client_extensions['id'] = f'{instrument}_{brick_num}'
+
+        self.oanda.send_request(
+            method='POST',
+            endpoint='orders',
+            data={
+                'order': {
+                    'type': 'LIMIT',
+                    'instrument': instrument,
+                    'price': limit_price,
+                    'units': trade_size_units,
+                    'timeInForce': 'GTC',
+                    'clientExtensions': client_extensions,
+                    'tradeClientExtensions': client_extensions,
                 }
             }
         )

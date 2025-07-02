@@ -62,10 +62,10 @@ exeuction_flagging AS (
       order by candle_open_time asc
     ) as execute_brick_number,
 
-    lag(trend_group) over (
+    lag(brick_close) over (
       partition by instrument
       order by candle_open_time asc
-    ) as execute_trend_group
+    ) as execute_price
 
   FROM join_renko_to_ohlc
 
