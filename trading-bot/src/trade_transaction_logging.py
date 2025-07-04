@@ -64,6 +64,6 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     test_event = {
-        'ACCOUNT_ID': 2
+        'ACCOUNT_ID': 1
     }
     lambda_handler(test_event, None)

@@ -73,12 +73,11 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    instrument = 'EUR_USD'
     test_event = {
-        'ACCOUNT_ID': 1,
-        'INSTRUMENT': instrument,
-        'DIRECTION': 'SHORT',
-        'BRICK_NUM': 54321,
-        'ENTRY_PRICE': 1.18050
+        "ACCOUNT_ID": 2,
+        "INSTRUMENT": "USD_JPY",
+        "DIRECTION": "LONG",
+        "BRICK_NUM": 30667,
+        "ENTRY_PRICE": 143.70
     }
     lambda_handler(test_event, None)

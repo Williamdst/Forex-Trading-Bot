@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 from infrastructure.oanda import OandaClient
 from infrastructure.snowflake import SnowflakeClient
+from datetime import datetime, timedelta
 
 load_dotenv()
 SNOWFLAKE = SnowflakeClient(
@@ -112,3 +113,32 @@ if __name__ == "__main__":
         }
         result = lambda_handler(test_event, None)
 
+
+# if __name__ == "__main__":
+#     from_date_str = '2002-05-01T00:00:00'  # No Z here
+#     step_hours = 3
+#
+#     # Parse the FROM_DATE without Z
+#     from_date = datetime.strptime(from_date_str, "%Y-%m-%dT%H:%M:%S")
+#     now = datetime.utcnow()
+#     step = timedelta(days=step_hours)
+#     current_from = from_date
+#
+#     while current_from < now:
+#         current_to = current_from + step
+#         if current_to > now:
+#             current_to = now
+#
+#         # Format the dates back to ISO with Z
+#         from_date_iso = current_from.strftime("%Y-%m-%dT%H:%M:%SZ")
+#         to_date_iso = current_to.strftime("%Y-%m-%dT%H:%M:%SZ")
+#
+#         test_event = {
+#             'INSTRUMENT': 'EUR_USD',
+#             'GRANULARITY': 'M1',
+#             'FROM_DATE': from_date_iso,
+#             'TO_DATE': to_date_iso,
+#         }
+#
+#         result = lambda_handler(test_event, None)
+#         current_from = current_to
