@@ -128,11 +128,23 @@ class SimpleTradingEnv(gym.Env):
                 self.current_position_type = Position.EMPTY
                 self.trade_entry_price = None
 
-
-
-
         elif self.current_position_type == Position.SHORT:
             if action in (1, 2): reward = -10.0
+
+            # Hold Position
+            elif action == 0:
+                previous_unrealized_pnl = self.current_unrealized_pnl
+                self.current_unrealized_pnl = self.trade_entry_price - self.prices[self.current_step + 1]
+                reward = self.current_unrealized_pnl - previous_unrealized_pnl
+
+            # Close Position
+            elif action == 3:
+                reward = self.trade_entry_price - self.prices[self.current_step]
+                self.current_balance += reward
+
+                self.current_unrealized_pnl = 0.0
+                self.current_position_type = Position.EMPTY
+                self.trade_entry_price = None
 
         new_return = (
             np.log(self.prices[self.current_step+1] / self.prices[self.current_step])
