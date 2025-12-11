@@ -80,15 +80,6 @@ class SimpleTradingEnv(gym.Env):
 
 
     def step(self, action):
-        if self.current_step == len(self.prices):
-            terminated = True
-            # TODO: FIGUR OUT RETURN VALUES
-            # return self._get_obs(), 0.0, terminated, False, self._get_info()
-
-        # When opening a position, store the entry price and the account balance
-        # at the time of entry (because each instrument will run indenpendently)
-        # iterate the num of trades by 1
-
         reward = 0.0
         terminated = False
         truncated = False
@@ -121,9 +112,10 @@ class SimpleTradingEnv(gym.Env):
 
             # Close Position
             elif action == 3:
-                reward = self.prices[self.current_step] - self.trade_entry_price
-                self.current_balance += reward
+                total_profit = self.prices[self.current_step] - self.trade_entry_price
+                self.current_balance += total_profit
 
+                reward = 0.0
                 self.current_unrealized_pnl = 0.0
                 self.current_position_type = Position.EMPTY
                 self.trade_entry_price = None
@@ -139,9 +131,10 @@ class SimpleTradingEnv(gym.Env):
 
             # Close Position
             elif action == 3:
-                reward = self.trade_entry_price - self.prices[self.current_step]
-                self.current_balance += reward
+                total_profit = self.trade_entry_price - self.prices[self.current_step]
+                self.current_balance += total_profit
 
+                reward = 0.0
                 self.current_unrealized_pnl = 0.0
                 self.current_position_type = Position.EMPTY
                 self.trade_entry_price = None
@@ -152,127 +145,39 @@ class SimpleTradingEnv(gym.Env):
         observation = {
             "market": np.array([new_return], dtype=np.float32),
             "trade": {
-                "unrealized_pnl": np.float32(reward),
+                "unrealized_pnl": np.float32(self.current_unrealized_pnl),
                 "open_position": np.int64(self.current_position_type.value)
             }
         }
         self.current_step += 1
 
-        return observation, reward
+        if self.current_balance <= 0:
+            terminated = True
+
+        if self.current_step == len(self.prices):
+            truncated = True
+
+        return observation, reward, terminated, truncated, {}
 
 
 
 if __name__ == "__main__":
     env = SimpleTradingEnv(
-        prices=np.array([100, 110, 150, 110, 100])
+        prices=np.array([100, 110, 150, 200, 250])
     )
-
     obs, info = env.reset()
 
-    obs, reward = env.step(action=1)
+    obs, reward, terminated, truncated, info = env.step(action=2)
     print(obs, reward)
     print(env.__dict__)
     print()
 
-    obs, reward = env.step(action=3)
+    obs, reward, terminated, truncated, info = env.step(action=0)
     print(obs, reward)
     print(env.__dict__)
     print()
 
-
-
-
-
-
-
-    def step_gpt(self, action):
-        # If we've reached the last price point -> episode ends
-        if self.current_step == len(self.prices):
-            terminated = True
-            return self._get_obs(), 0.0, terminated, False, self._get_info()
-
-        reward = 0.0
-        terminated = False
-        truncated = False
-
-        current_return = self.prices[self.current_step]
-        self.current_step += 1
-        next_return = self.prices[self.current_step]
-
-        # Calculate unrealized PnL if there is an open position
-        unrealized_pnl = 0.0
-        if self.current_position_type != Position.EMPTY:
-            if self.current_position_type == Position.LONG:
-                unrealized_pnl = next_return
-            elif self.current_position_type == Position.SHORT:
-                unrealized_pnl = -next_return
-
-            normalized_unrealized_pnl = unrealized_pnl / self.trade_entry_balance
-        else:
-            normalized_unrealized_pnl = 0.0
-
-        # -------------------------
-        #  ACTION DECISION LOGIC
-        # -------------------------
-
-        if action == 0:  # HOLD
-            if self.current_position_type != Position.EMPTY:
-                reward = (
-                        normalized_unrealized_pnl - self.previous_unrealized_pnl)
-            else:
-                reward = 0.0
-
-        elif action == 1:  # BUY
-            if self.current_position_type != Position.EMPTY:
-                # Invalid Action!
-                reward = -10.0
-            else:
-                # Opening long position
-                self.current_position_type = Position.LONG
-                self.trade_entry_balance = self.current_balance
-                self.previous_unrealized_pnl = 0.0
-                self.num_trades += 1
-                reward = 0.0
-
-        elif action == 2:  # SELL
-            if self.current_position_type != Position.EMPTY:
-                reward = -10.0
-            else:
-                self.current_position_type = Position.SHORT
-                self.trade_entry_balance = self.current_balance
-                self.previous_unrealized_pnl = 0.0
-                self.num_trades += 1
-                reward = 0.0
-
-        elif action == 3:  # CLOSE POSITION
-            if self.current_position_type == Position.EMPTY:
-                reward = -10.0
-            else:
-                # Realize PnL
-                realized_pnl = normalized_unrealized_pnl
-                pnl_amt = realized_pnl * self.trade_entry_balance
-                self.current_balance += pnl_amt
-
-                # Reward: difference from last unrealized pnl (per spec)
-                reward = (
-                        normalized_unrealized_pnl - self.previous_unrealized_pnl)
-
-                # Reset trade state
-                self.current_position_type = Position.EMPTY
-                self.trade_entry_balance = None
-                self.previous_unrealized_pnl = 0.0
-
-        # Update unrealized reference for next step
-        if self.current_position_type != Position.EMPTY:
-            self.previous_unrealized_pnl = normalized_unrealized_pnl
-
-        # -------------------------
-        # TERMINATE CONDITIONS
-        # -------------------------
-        if self.current_balance <= 0:
-            terminated = True
-
-        if self.current_step >= len(self.prices) - 1:
-            terminated = True
-
-        return self._get_obs(), reward, terminated, truncated, self._get_info()
+    obs, reward, terminated, truncated, info = env.step(action=3)
+    print(obs, reward)
+    print(env.__dict__)
+    print()
