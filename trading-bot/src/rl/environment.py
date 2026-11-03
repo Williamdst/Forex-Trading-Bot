@@ -34,6 +34,7 @@ class SimpleTradingEnv(gym.Env):
         self.current_step = 0  # start at 0 (first price index)
         self.num_trades = 0
         self.current_position_type = Position.EMPTY
+        self.previous_unrealized_pnl = np.float32(0.0)
         self.current_unrealized_pnl = np.float32(0.0)
 
         # Actions: hold, buy, sell, close
@@ -66,6 +67,31 @@ class SimpleTradingEnv(gym.Env):
         normalized = np.float32(np.clip(val / max(1.0, self.initial_balance), -1.0, 1.0))
         return normalized
 
+    def _get_market_window(self) -> np.ndarray:
+        """
+        Get returns from current price to previous prices.
+        Returns array of [return(current, current-1), return(current, current-2), ..., return(current, current-window_size)]
+
+        If we don't have enough history, pad with zeros at the end.
+        """
+        current_idx = self.current_step
+        current_price = self.prices[current_idx]
+
+        returns = np.zeros(self.window_size, dtype=np.float32)
+
+        for i in range(self.window_size):
+            lookback_idx = current_idx - (i + 1)  # Look back i+1 steps
+
+            if lookback_idx >= 0:
+                past_price = self.prices[lookback_idx]
+                # Log return from past price to current price
+                returns[i] = np.log(current_price / past_price)
+            else:
+                # Not enough history, keep as 0
+                returns[i] = 0.0
+
+        return returns
+
     def reset(self, seed=None, options=None):
         # TODO: MY RESET SHOULD RESET PRICE ARRAY FROM GAN
 
@@ -75,13 +101,10 @@ class SimpleTradingEnv(gym.Env):
         self.num_trades = 0
         self.current_position_type = Position.EMPTY
         self.current_unrealized_pnl = np.float32(0.0)
-
-        init_return = (
-            np.log(self.prices[self.current_step] / self.prices[self.current_step - 1])
-        )
+        self.previous_unrealized_pnl = np.float32(0.0)
 
         observation = {
-            "market": np.array([init_return], dtype=np.float32),
+            "market": self._get_market_window(),
             "trade": {
                 "unrealized_pnl": np.float32(0.0),
                 "open_position": np.int64(self.current_position_type.value)
@@ -119,7 +142,6 @@ class SimpleTradingEnv(gym.Env):
 
         current_price = float(self.prices[idx])
         next_price = float(self.prices[next_idx]) if has_next_idx else current_price
-        prev_unrealized_pnl = float(self.current_unrealized_pnl)
 
         invalid_action_penalty = -0.01 * self.initial_balance
         if not self.action_space.contains(action):
@@ -145,8 +167,7 @@ class SimpleTradingEnv(gym.Env):
         ):
             if action == 1 or action == 2: reward = invalid_action_penalty
             else:
-                # TODO HOW TO DO DELTA REWARD TO MAKE IT SUMMABLE?
-                reward = self.current_unrealized_pnl
+                reward = self.current_unrealized_pnl - self.previous_unrealized_pnl
 
                 if action == 0: pass
                 if action == 3:
@@ -156,64 +177,97 @@ class SimpleTradingEnv(gym.Env):
                     self.current_position_type = Position.EMPTY
                     self.trade_entry_price = None
 
-        # TODO: THE TRUNCATION LOGIC
+        # THE TRUNCATION LOGIC - FORCE CLOSE AT END OF EPISODE
         if is_last_step:
             truncated = True
 
+            # Force close any open position at current price
+            if self.current_position_type != Position.EMPTY:
+                if self.current_position_type == Position.LONG:
+                    self.current_unrealized_pnl = float(current_price - self.trade_entry_price)
+                else:
+                    self.current_unrealized_pnl = float(self.trade_entry_price - current_price)
+
+                # Reward is the CHANGE in unrealized PnL (delta)
+                reward = self.current_unrealized_pnl - self.previous_unrealized_pnl
+                self.current_balance += self.current_unrealized_pnl
+
+            self.current_position_type = Position.EMPTY
+            self.trade_entry_price = None
+
+            # Build final observation
+            if idx > 0:
+                old_return = np.log(self.prices[idx] / self.prices[idx - 1])
+            else:
+                old_return = 0.0
+
+            observation = {
+                "market": self._get_market_window(),
+                "trade": {
+                    "unrealized_pnl": np.float32(0.0),  # Position is now closed
+                    "open_position": np.int64(self.current_position_type.value)
+                    # Will be 0 (EMPTY)
+                }
+            }
+
+            return observation, reward, terminated, truncated, info
+
+
         if self.current_position_type == Position.LONG:
+            self.previous_unrealized_pnl = self.current_unrealized_pnl
             self.current_unrealized_pnl = float(next_price - self.trade_entry_price)
         elif self.current_position_type == Position.SHORT:
+            self.previous_unrealized_pnl = self.current_unrealized_pnl
             self.current_unrealized_pnl = float(self.trade_entry_price - next_price)
         else:
             self.current_unrealized_pnl = 0.0
-
-        # TODO: FIGURE OUT REWARD STUFF
-
 
         self.current_step = min(next_idx, len(self.prices) - 1)
         if self.current_balance <= 0:
             terminated = True
 
-        new_return = np.log(self.prices[next_idx] / self.prices[idx])
+        # new_return = np.log(self.prices[next_idx] / self.prices[idx])
         observation = {
-            "market": np.array([new_return], dtype=np.float32),
+            "market": self._get_market_window(),
             "trade": {
                 "unrealized_pnl": np.float32(self.current_unrealized_pnl),
                 "open_position": np.int64(self.current_position_type.value)
             }
         }
 
-        return observation, reward, terminated, truncated, {}
+        return observation, reward, terminated, truncated, info
 
 
 
 if __name__ == "__main__":
     env = SimpleTradingEnv(
-        prices=np.array([100, 110, 150, 200, 250])
+        prices=np.array([100, 110, 150, 200, 150])
     )
     obs, info = env.reset()
-
-    obs, reward, terminated, truncated, info = env.step(action=1)
-    print(obs, reward)
-    print(env.__dict__)
+    print(obs)
     print()
 
-    obs, reward, terminated, truncated, info = env.step(action=3)
-    print(obs, reward)
+    obs, reward, terminated, truncated, info = env.step(action=1)
+    print(reward, obs)
     print(env.__dict__)
     print()
 
     obs, reward, terminated, truncated, info = env.step(action=1)
-    print(obs, reward)
+    print(reward, obs)
+    print(env.__dict__)
+    print()
+
+    obs, reward, terminated, truncated, info = env.step(action=1)
+    print(reward, obs)
     print(env.__dict__)
     print()
 
     obs, reward, terminated, truncated, info = env.step(action=0)
-    print(obs, reward)
+    print(reward, obs)
     print(env.__dict__)
     print()
 
     obs, reward, terminated, truncated, info = env.step(action=3)
-    print(obs, reward)
+    print(reward, obs)
     print(env.__dict__)
     print()
