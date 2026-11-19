@@ -12,7 +12,79 @@ sources:
     schema: data
     tables:
       - name: hour1_renko_bricks
+        description: >
+          The source table containing generated Renko bricks for each instrument, derived from Oanda H1 OHLC candles.
+          Bricks are generated with a fixed size (pips/points) defined in the instrument configuration.
+          The generation process (via `data_renko_generation` lambda) performs a full refresh per instrument.
+          It handles "streaks" where a single price update triggers multiple bricks; in such cases, all bricks
+          share the same `candle_close_time`.
+        columns:
+          - name: instrument
+            description: "The name of the financial instrument (e.g., EUR_USD)."
+          - name: brick_number
+            description: "Sequential index of the Renko brick in the generated series."
+          - name: candle_open_time
+            description: >
+              The open time of the candle period associated with the start of this brick. For multi-brick moves
+              (streaks), the open time remains constant across the entire streak.
+          - name: candle_close_time
+            description: "The close time of the candle that triggered the completion of this brick."
+          - name: brick_type
+            description: "The direction of the brick: 'LONG' (upward) or 'SHORT' (downward)."
+          - name: open
+            description: "The opening price of the Renko brick."
+          - name: high
+            description: "The highest price of the brick (max of open and close, as Renko bricks have no wicks)."
+          - name: low
+            description: "The lowest price of the brick (min of open and close, as Renko bricks have no wicks)."
+          - name: close
+            description: "The closing price of the Renko brick."
+          - name: streak_order
+            description: "The zero-based index of the brick within a multi-brick move (streak) triggered by a single candle."
+          - name: brick_inserted_at
+            description: "Timestamp when the Renko brick record was inserted into the database."
+
       - name: oanda_hour1_forex_candles
+        description: >
+          The source table containing 1 Hour Forex candles extracted from Oanda. This table contains duplicated
+          candle data and needs to be deduplicated to fit the grain of one candle open time per instrument.
+        columns:
+          - name: instrument
+            description: "The name of the financial instrument (e.g., EUR_USD)."
+          - name: granularity
+            description: "The time interval of the candle (e.g., H1 for 1 hour)."
+          - name: candle_open_time
+            description: "The start time of the candle interval."
+          - name: is_candle_complete
+            description: "Boolean indicating whether the candle represents a complete time period."
+          - name: volume
+            description: "The number of units traded during the candle interval."
+          - name: ask_open
+            description: "The opening ask price of the candle."
+          - name: ask_high
+            description: "The highest ask price during the candle interval."
+          - name: ask_low
+            description: "The lowest ask price during the candle interval."
+          - name: ask_close
+            description: "The closing ask price of the candle."
+          - name: bid_open
+            description: "The opening bid price of the candle."
+          - name: bid_high
+            description: "The highest bid price during the candle interval."
+          - name: bid_low
+            description: "The lowest bid price during the candle interval."
+          - name: bid_close
+            description: "The closing bid price of the candle."
+          - name: mid_open
+            description: "The opening midpoint price of the candle."
+          - name: mid_high
+            description: "The highest midpoint price during the candle interval."
+          - name: mid_low
+            description: "The lowest midpoint price during the candle interval."
+          - name: mid_close
+            description: "The closing midpoint price of the candle."
+          - name: candle_inserted_at
+            description: "Timestamp when the candle record was inserted into the database."
 
   - name: application_data
     description: "Application data for the project"
@@ -24,5 +96,22 @@ sources:
       {%- endif -%}
     schema: application
     tables:
-      - name: instruments
       - name: account_logs
+        description: >
+          Landing table for raw Oanda account transaction logs. Data is extracted from the Oanda API
+          (endpoint `transactions/sinceid`) and stored as JSON in S3 before being ingested into Snowflake.
+          Each record in `raw_data` contains an object with a `transactions` array, which is flattened
+          and parsed in downstream models.
+        columns:
+          - name: raw_data
+            description: "The raw JSON response from Oanda API containing transaction records and metadata."
+          - name: filename
+            description: "The name of the source file from which the data was ingested."
+          - name: file_row_number
+            description: "The row number within the source file for this record."
+          - name: file_content_key
+            description: "A unique identifier or checksum for the content of the file."
+          - name: file_last_modified
+            description: "The last modified timestamp of the source file in the stage."
+          - name: start_scan_time
+            description: "The timestamp when the ingestion process started scanning the file."
