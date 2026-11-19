@@ -50,6 +50,20 @@ The `instruments` table serves as the global configuration store, maintaining th
 
 The Renko generation process integrates the [dbt_project](dbt_project) to handle data quality. Because the extraction process intentionally pulls overlapping candles (the current and previous) to account for Oanda API variability, dbt is used to deduplicate the `oanda_hour1_forex_candles` table into `oanda__hour1_forex_candles`.
 
-The Renko generator processes this cleaned data and outputs to the `hour1_renko_bricks` table. This is then transformed by dbt into the final `oanda__hour1_renko_bricks` table, which includes several key analytical columns:
-- `did_direction_shift`: Identifies trend reversals (buy-to-sell or vice-versa).
+The Renko generator processes this cleaned data and outputs to the `hour1_renko_bricks` table. This is then transformed by dbt into two specialized tables, `oanda__hour1_renko_bricks` and `oanda__hour1_renko_bricks_deduped`, both of which include key analytical columns:
+- `did_direction_shift`: Identifies trend reversals (buy-to-sell or vice-versa), serving as the trade execution signal.
 - `trend_group`: Groups sequential bricks of the same direction for trend analysis.
+
+The `deduped` model handles candles that generate multiple bricks (which share the same open/close time) by only retaining the final brick. This ensures data integrity when joining Renko data back to the OHLC candles used for trade execution.
+
+### Trade Execution
+
+By joining the `oanda__hour1_renko_bricks_deduped` table back to the original OHLC candles, the `ts__hour1_renko_ohlc` table determines if trade conditions are met. A second state machine monitors this table, identifies instruments with active signals, and executes trades across all configured accounts.
+
+![renko-trade-execution.png](img/renko-trade-execution.png)
+
+### Retrospective: Why it Failed
+
+While backtests initially showed promising "net brick counts" across major pairs, the strategy failed in execution due to **slippage and lag**.
+
+Renko is a smoothing technique, which inherently introduces a delay. By the time a new brick is confirmed and a signal is generated, the actual market price has often already drifted significantly from the brick's price level. This drift occurs at both entry and exit, effectively eroding the strategy's statistical edge. Continuous iterations and research confirmed that the latency introduced by the smoothing surpassed the gains from trend identification.
